@@ -12,8 +12,7 @@
     {
       "binding": "DB",
       "database_name": "caffienation-votes",
-      // Paste the id printed by `npx wrangler d1 create caffienation-votes`.
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_id": "b24edb1c-8d63-487b-944e-cec7f8838e0d"
     }
   ],
   "vars": {
