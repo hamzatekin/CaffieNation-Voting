@@ -542,3 +542,21 @@ textarea:focus, .dot:focus-visible, .choice:focus-visible, .btn:focus-visible { 
 .happy-seg.bean-red { background: #b0503a; }
 .happy-seg.bean-black { background: var(--espresso); }
 .happy-seg.bean-any { background: var(--latte); }
+
+.inline-form { display: flex; gap: 8px; }
+.inline-form input {
+  flex: 1;
+  min-width: 0;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 12px 16px;
+  font: 16px var(--sans);
+  background: var(--foam);
+}
+.summary-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.summary-table th, .summary-table td { padding: 10px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.summary-table th { font-weight: 600; width: 45%; }
+.summary-table td { color: var(--roast); }
+.hint { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+.delete { appearance: none; border: 0; background: transparent; cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.6; }
+.delete:hover { opacity: 1; }

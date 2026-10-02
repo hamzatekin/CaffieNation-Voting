@@ -6,7 +6,7 @@ People scan a QR code, rate the machine on six categories (1 to 5), answer
 
 - `/` is the vote page for today's machine (the Rijo42 avari B20); `/?m=<slug>` picks another machine
 - Machines (photo, link, red-beans note) are listed in `public/machines.js`; add one there before its demo
-- `/admin` (password protected) shows live results per machine, every vote and comment, a CSV download, and makes the QR codes
+- `/admin` (password protected) shows a summary per machine, every vote and comment, a CSV download, and lets you delete test votes
 
 Everything runs free on Cloudflare: the pages are static files and the votes
 live in a D1 (SQLite) database behind a tiny Worker (`src/worker.js`).
@@ -24,8 +24,7 @@ npm run db:init                             # creates the votes table
 npm run deploy                              # prints your https://caffienation-voting.<you>.workers.dev URL
 ```
 
-Then set an admin password (below), open `https://<your-url>/admin`, type the machine name, and press
-**Make QR** (or **Show big for the demo** to put it full screen on a laptop or TV).
+Then set an admin password (below) and open `https://<your-url>/admin`.
 
 To deploy automatically on every push, connect this repo in the Cloudflare
 dashboard under Workers & Pages → your worker → Settings → Builds.

@@ -19,6 +19,13 @@ export default {
       if (url.pathname === "/api/results" && request.method === "GET") {
         return await results(request, url, env);
       }
+      if (url.pathname === "/api/status" && request.method === "GET") {
+        return await status(request, url, env);
+      }
+      const del = url.pathname.match(/^\/api\/votes\/(\d+)$/);
+      if (del && request.method === "DELETE") {
+        return await deleteVote(request, env, Number(del[1]));
+      }
       return json({ error: "Not found" }, 404);
     } catch (err) {
       console.error(err);
@@ -135,7 +142,7 @@ async function results(request, url, env) {
   if (!machine) return json({ machines, machine: null });
 
   const { results: rows } = await env.DB.prepare(
-    `SELECT ${CATEGORIES.join(", ")}, happy, beans, comment, created_at FROM votes WHERE machine = ? ORDER BY id DESC`,
+    `SELECT id, ${CATEGORIES.join(", ")}, happy, beans, comment, created_at FROM votes WHERE machine = ? ORDER BY id DESC`,
   )
     .bind(machine)
     .all();
@@ -169,6 +176,24 @@ async function results(request, url, env) {
     .map((row) => ({ text: row.comment, happy: row.happy, overall: row.overall, at: row.created_at }));
 
   return json({ machines, machine, total: rows.length, categories, happy, beans, comments, votes: rows });
+}
+
+// Lets the vote page check whether this device already voted, so a vote
+// deleted in the admin page frees the device to vote again.
+async function status(request, url, env) {
+  const machine = String(url.searchParams.get("m") || "").toLowerCase();
+  const voterId = readCookie(request, COOKIE);
+  if (!SLUG.test(machine) || !VOTER_ID.test(voterId || "")) return json({ voted: false });
+  const row = await env.DB.prepare("SELECT 1 FROM votes WHERE machine = ? AND voter_id = ?").bind(machine, voterId).first();
+  return json({ voted: Boolean(row) });
+}
+
+async function deleteVote(request, env, id) {
+  if (!(await isAdmin(request, env))) {
+    return json({ error: "Wrong password." }, 401);
+  }
+  const result = await env.DB.prepare("DELETE FROM votes WHERE id = ?").bind(id).run();
+  return json({ ok: true, deleted: result.meta.changes });
 }
 
 function json(data, status = 200, setCookie) {

@@ -30,6 +30,30 @@ revealOnScroll();
 sprinkleBeans();
 
 if (localStorage.getItem(votedKey)) showDone(true);
+checkVoted();
+
+// The server is the source of truth: it knows this device's cookie, and an
+// admin may have deleted the vote since.
+async function checkVoted() {
+  try {
+    const res = await fetch(`/api/status?m=${encodeURIComponent(machine)}`);
+    const { voted } = await res.json();
+    if (voted && !localStorage.getItem(votedKey)) {
+      localStorage.setItem(votedKey, "server");
+      showDone(true);
+    } else if (!voted && localStorage.getItem(votedKey)) {
+      localStorage.removeItem(votedKey);
+      hideDone();
+    }
+  } catch {}
+}
+
+function hideDone() {
+  const overlay = $("#done");
+  overlay.classList.remove("show");
+  overlay.hidden = true;
+  document.body.classList.remove("locked");
+}
 
 function prettify(slug) {
   return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
