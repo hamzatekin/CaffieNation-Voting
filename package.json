@@ -1,0 +1,14 @@
+{
+  "name": "caffienation-voting",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute caffienation-votes --remote --file=schema.sql",
+    "db:init:local": "wrangler d1 execute caffienation-votes --local --file=schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

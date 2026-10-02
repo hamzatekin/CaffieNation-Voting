@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2b1a12">
+  <title>CaffieNation · Rate the machine</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="beans" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div class="hero-photo" style="--photo: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1400&q=70&auto=format&fit=crop')"></div>
+    <div class="hero-content">
+      <svg class="cup" viewBox="0 0 120 120" aria-hidden="true">
+        <g class="steam">
+          <path d="M45 38 C38 28, 52 22, 45 10" />
+          <path d="M60 38 C53 28, 67 22, 60 10" />
+          <path d="M75 38 C68 28, 82 22, 75 10" />
+        </g>
+        <path class="cup-body" d="M25 48 h70 v22 a35 35 0 0 1 -35 35 a35 35 0 0 1 -35 -35 z" />
+        <path class="cup-handle" d="M95 56 h6 a12 12 0 0 1 0 24 h-8" />
+        <ellipse class="cup-coffee" cx="60" cy="48" rx="35" ry="6" />
+        <rect class="cup-saucer" x="15" y="106" width="90" height="6" rx="3" />
+      </svg>
+      <p class="eyebrow">CaffieNation · Machine demo</p>
+      <h1>How was your coffee?</h1>
+      <p class="lead">Rate <strong id="machine-name">today's machine</strong> in about 30 seconds. One vote per person.</p>
+      <a class="btn btn-primary" href="#vote">Start voting</a>
+    </div>
+    <a class="scroll-hint" href="#vote" aria-label="Scroll to the vote">⌄</a>
+  </header>
+
+  <main id="vote">
+    <form id="vote-form" novalidate>
+      <div id="categories"></div>
+
+      <section class="card reveal happy-card">
+        <div class="card-photo" style="--photo: url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=900&q=65&auto=format&fit=crop')"></div>
+        <div class="card-body">
+          <h2>Would you be happy if this became our office machine?</h2>
+          <div class="choices" role="radiogroup" aria-label="Would you be happy if this became our office machine?">
+            <button type="button" class="choice" role="radio" aria-checked="false" data-value="no"><span class="choice-emoji">👎</span>No</button>
+            <button type="button" class="choice" role="radio" aria-checked="false" data-value="okay"><span class="choice-emoji">😐</span>It's okay</button>
+            <button type="button" class="choice" role="radio" aria-checked="false" data-value="yes"><span class="choice-emoji">👍</span>Yes</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card reveal">
+        <div class="card-body">
+          <h2>Anything you particularly liked or disliked?</h2>
+          <p class="question">Optional</p>
+          <textarea id="comment" maxlength="500" rows="3" placeholder="The crema was lovely, but the milk frother was loud…"></textarea>
+        </div>
+      </section>
+
+      <p class="credit">Photos from <a href="https://unsplash.com/s/photos/coffee" target="_blank" rel="noopener">Unsplash</a></p>
+    </form>
+  </main>
+
+  <div class="submit-bar">
+    <div class="progress" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="submit-row">
+      <span id="progress-text">0 of 7 answered</span>
+      <button class="btn btn-primary" id="submit" form="vote-form" type="submit" disabled>Send my vote</button>
+    </div>
+    <p class="error" id="error" role="alert" hidden></p>
+  </div>
+
+  <div class="overlay" id="done" hidden>
+    <div class="done-card">
+      <div class="done-photo" style="--photo: url('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=900&q=65&auto=format&fit=crop')"></div>
+      <div class="fill-cup" aria-hidden="true"><div class="fill-liquid"></div><div class="fill-handle"></div></div>
+      <h2 id="done-title">Thanks, vote brewed!</h2>
+      <p id="done-text">Your feedback helps us pick the right machine for the office.</p>
+    </div>
+  </div>
+
+  <script src="vote.js"></script>
+</body>
+</html>
