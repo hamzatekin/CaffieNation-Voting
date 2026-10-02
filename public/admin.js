@@ -12,26 +12,66 @@ const HAPPY = [
   { key: "yes", label: "👍 Yes" },
 ];
 
+const PW_KEY = "cn_admin_pw";
 const params = new URLSearchParams(location.search);
-const key = params.get("key") || "";
 let current = params.get("m") || "";
+let password = storage("get") || "";
+let lastData = null;
 const $ = (sel) => document.querySelector(sel);
 
-load();
-setInterval(load, 10000);
+if (password) load();
+else showLogin();
+setInterval(() => password && load(), 10000);
+
+function storage(op, value) {
+  try {
+    if (op === "get") return localStorage.getItem(PW_KEY);
+    if (op === "set") localStorage.setItem(PW_KEY, value);
+    if (op === "del") localStorage.removeItem(PW_KEY);
+  } catch {}
+  return null;
+}
+
+function showLogin(error) {
+  $("#dashboard").hidden = true;
+  $("#login").hidden = false;
+  $("#login-error").hidden = !error;
+  $("#login-error").textContent = error || "";
+  $("#password").focus();
+}
+
+$("#login").addEventListener("submit", (event) => {
+  event.preventDefault();
+  password = $("#password").value;
+  load();
+});
+
+$("#logout").addEventListener("click", () => {
+  password = "";
+  storage("del");
+  $("#password").value = "";
+  showLogin();
+});
 
 async function load() {
   const query = new URLSearchParams();
   if (current) query.set("m", current);
-  if (key) query.set("key", key);
   let data;
   try {
-    const res = await fetch(`/api/results?${query}`);
+    const res = await fetch(`/api/results?${query}`, { headers: { "X-Admin-Password": password } });
     data = await res.json();
+    if (res.status === 401) {
+      password = "";
+      storage("del");
+      return showLogin("Wrong password, try again.");
+    }
     if (!res.ok) throw new Error(data.error || "Could not load results.");
   } catch (err) {
     return showMessage(err.message);
   }
+  storage("set", password);
+  $("#login").hidden = true;
+  $("#dashboard").hidden = false;
 
   renderTabs(data.machines, data.machine);
   if (!data.machine) {
@@ -52,7 +92,7 @@ function showMessage(text) {
   const el = $("#message");
   el.textContent = text;
   el.hidden = false;
-  ["#stats", "#breakdown", "#happy", "#comments-card"].forEach((s) => ($(s).hidden = true));
+  ["#stats", "#breakdown", "#happy", "#comments-card", "#votes-card"].forEach((s) => ($(s).hidden = true));
 }
 
 function prettify(slug) {
@@ -119,7 +159,35 @@ function render(data) {
     list.appendChild(item);
   });
   $("#comments-card").hidden = data.comments.length === 0;
+
+  lastData = data;
+  const tbody = $("#votes");
+  tbody.innerHTML = "";
+  data.votes.forEach((v) => {
+    const row = document.createElement("tr");
+    const mood = HAPPY.find((h) => h.key === v.happy);
+    [v.created_at, v.taste, v.milk, v.ease, v.speed, v.cleaning, v.overall, mood ? mood.label : v.happy, v.comment || ""].forEach((value) => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+    tbody.appendChild(row);
+  });
+  $("#votes-card").hidden = data.votes.length === 0;
 }
+
+$("#csv").addEventListener("click", () => {
+  if (!lastData) return;
+  const cols = ["created_at", "taste", "milk", "ease", "speed", "cleaning", "overall", "happy", "comment"];
+  const escape = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+  const lines = [cols.join(","), ...lastData.votes.map((v) => cols.map((c) => escape(v[c])).join(","))];
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `${lastData.machine}-votes.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
 
 function voteUrl(slug) {
   const url = new URL("/", location.origin);

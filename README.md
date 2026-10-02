@@ -5,7 +5,7 @@ People scan a QR code, rate the machine on six categories (1 to 5), answer
 "Would you be happy if this became our office machine?", and can leave a comment.
 
 - `/?m=jura-e8` is the vote page for one machine (each machine gets its own link)
-- `/results.html` shows live results per machine, all comments, and makes the QR codes
+- `/admin` (password protected) shows live results per machine, every vote and comment, a CSV download, and makes the QR codes
 
 Everything runs free on Cloudflare: the pages are static files and the votes
 live in a D1 (SQLite) database behind a tiny Worker (`src/worker.js`).
@@ -23,7 +23,7 @@ npm run db:init                             # creates the votes table
 npm run deploy                              # prints your https://caffienation-voting.<you>.workers.dev URL
 ```
 
-Then open `https://<your-url>/results.html`, type the machine name, and press
+Then set an admin password (below), open `https://<your-url>/admin`, type the machine name, and press
 **Make QR** (or **Show big for the demo** to put it full screen on a laptop or TV).
 
 To deploy automatically on every push, connect this repo in the Cloudflare
@@ -35,8 +35,18 @@ Local testing: `npm run db:init:local && npm run dev`, then open http://localhos
 
 | Setting | What it does |
 | --- | --- |
-| `RESULTS_KEY` | If set, the results page only works as `/results.html?key=<that word>`. |
 | `MAX_VOTES_PER_IP` | Caps votes per network per machine. Leave at `0` for office Wi-Fi, where everyone shares one public IP. |
+
+## Admin password
+
+The password is stored as a SHA-256 hash in the database's `settings` table,
+so it never ends up in this public repo. To set or change it:
+
+```bash
+HASH=$(printf %s 'your-new-password' | sha256sum | cut -d' ' -f1)
+npx wrangler d1 execute caffienation-votes --remote --command \
+  "INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password_sha256', '$HASH')"
+```
 
 ## How "one vote per person" works
 

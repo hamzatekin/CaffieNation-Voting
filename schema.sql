@@ -18,3 +18,9 @@ CREATE TABLE IF NOT EXISTS votes (
 );
 
 CREATE INDEX IF NOT EXISTS votes_machine_ip ON votes (machine, ip_hash);
+
+-- Holds the admin password hash (see isAdmin in src/worker.js).
+CREATE TABLE IF NOT EXISTS settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

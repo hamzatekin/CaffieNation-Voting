@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#2b1a12">
-  <title>CaffieNation · Results</title>
+  <title>CaffieNation · Admin</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,13 +15,26 @@
   <header class="results-hero">
     <div class="hero-photo" style="--photo: url('https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=1400&q=60&auto=format&fit=crop')"></div>
     <div class="results-hero-content">
-      <p class="eyebrow">CaffieNation · Live results</p>
+      <p class="eyebrow">CaffieNation · Admin</p>
       <h1 id="title">Results</h1>
       <div class="machine-tabs" id="tabs"></div>
     </div>
   </header>
 
   <main class="results-main">
+    <form class="card login" id="login" hidden>
+      <div class="card-body">
+        <h2>Admin login</h2>
+        <p class="question">Enter the admin password to see the votes.</p>
+        <div class="qr-form">
+          <input id="password" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password">
+          <button class="btn btn-primary" type="submit">Open</button>
+        </div>
+        <p class="error" id="login-error" hidden></p>
+      </div>
+    </form>
+
+    <div id="dashboard" hidden>
     <p class="empty" id="message" hidden></p>
 
     <section class="stats" id="stats" hidden>
@@ -52,6 +65,21 @@
       </div>
     </section>
 
+    <section class="card results-card" id="votes-card" hidden>
+      <div class="card-body">
+        <div class="votes-head">
+          <h2>All votes</h2>
+          <button class="btn btn-ghost btn-small" id="csv" type="button">Download CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table class="votes-table">
+            <thead><tr><th>Time (UTC)</th><th>☕</th><th>🥛</th><th>👆</th><th>⚡</th><th>🧼</th><th>❤️</th><th>Happy?</th><th>Comment</th></tr></thead>
+            <tbody id="votes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <section class="card results-card qr-card">
       <div class="card-body">
         <h2>Share the vote</h2>
@@ -65,6 +93,8 @@
         <button class="btn btn-ghost" id="qr-fullscreen" type="button">Show big for the demo</button>
       </div>
     </section>
+    <button class="btn btn-ghost btn-small logout" id="logout" type="button">Log out</button>
+    </div>
   </main>
 
   <div class="qr-stage" id="qr-stage" hidden>
@@ -75,6 +105,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="results.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>

@@ -16,8 +16,6 @@
     }
   ],
   "vars": {
-    // Optional: set to a secret word to lock the results page (/results.html?key=...).
-    "RESULTS_KEY": "",
     // Optional: cap votes per network per machine. 0 = off. Keep it off for
     // office Wi-Fi, where everyone shares one public IP.
     "MAX_VOTES_PER_IP": "0"

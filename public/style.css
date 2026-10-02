@@ -481,3 +481,17 @@ textarea:focus, .dot:focus-visible, .choice:focus-visible, .btn:focus-visible { 
 .qr-stage h2 { font-size: clamp(30px, 6vw, 56px); margin-bottom: 24px; }
 .qr-big { padding: 18px; background: #fffaf3; border-radius: 24px; }
 .qr-stage-hint { color: var(--latte); font-size: 14px; margin-top: 18px; }
+
+/* ---------- Admin ---------- */
+.login { max-width: 460px; margin: 20px auto; }
+.login .error { color: #b0503a; margin: 4px 0 0; }
+.btn-small { padding: 10px 16px; font-size: 14px; }
+.votes-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.votes-head h2 { margin: 0; }
+.votes-head .btn { margin: 0; }
+.table-wrap { overflow-x: auto; margin: 0 -20px; padding: 0 20px; }
+.votes-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.votes-table th, .votes-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.votes-table th { color: var(--muted); font-weight: 600; }
+.votes-table td:last-child { white-space: normal; min-width: 200px; }
+.logout { margin-top: 8px; }

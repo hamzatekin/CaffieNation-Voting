@@ -16,7 +16,7 @@ export default {
         return await submitVote(request, env);
       }
       if (url.pathname === "/api/results" && request.method === "GET") {
-        return await results(url, env);
+        return await results(request, url, env);
       }
       return json({ error: "Not found" }, 404);
     } catch (err) {
@@ -99,9 +99,20 @@ async function submitVote(request, env) {
   return json({ ok: true, voterId }, 201, setCookie);
 }
 
-async function results(url, env) {
-  if (env.RESULTS_KEY && url.searchParams.get("key") !== env.RESULTS_KEY) {
-    return json({ error: "This page needs the results key." }, 401);
+// The admin password lives as a SHA-256 hash in the D1 settings table, so it
+// never appears in this (public) repo. Change it with:
+//   INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password_sha256', '<sha256 hex>');
+async function isAdmin(request, env) {
+  const password = request.headers.get("X-Admin-Password") || "";
+  if (!password) return false;
+  const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'admin_password_sha256'").first();
+  if (!row) return false;
+  return (await sha256(password, 32)) === row.value;
+}
+
+async function results(request, url, env) {
+  if (!(await isAdmin(request, env))) {
+    return json({ error: "Wrong password." }, 401);
   }
 
   const { results: machines } = await env.DB.prepare(
@@ -113,7 +124,7 @@ async function results(url, env) {
   if (!machine) return json({ machines, machine: null });
 
   const { results: rows } = await env.DB.prepare(
-    `SELECT ${CATEGORIES.join(", ")}, happy, comment, created_at FROM votes WHERE machine = ? ORDER BY created_at DESC`,
+    `SELECT ${CATEGORIES.join(", ")}, happy, comment, created_at FROM votes WHERE machine = ? ORDER BY id DESC`,
   )
     .bind(machine)
     .all();
@@ -137,7 +148,7 @@ async function results(url, env) {
     .slice(0, 200)
     .map((row) => ({ text: row.comment, happy: row.happy, overall: row.overall, at: row.created_at }));
 
-  return json({ machines, machine, total: rows.length, categories, happy, comments });
+  return json({ machines, machine, total: rows.length, categories, happy, comments, votes: rows });
 }
 
 function json(data, status = 200, setCookie) {
@@ -155,10 +166,10 @@ function readCookie(request, name) {
   return null;
 }
 
-async function sha256(text) {
+async function sha256(text, bytes = 12) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return [...new Uint8Array(digest)]
-    .slice(0, 12)
+    .slice(0, bytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
