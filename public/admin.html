@@ -58,6 +58,14 @@
       </div>
     </section>
 
+    <section class="card results-card" id="beans" hidden>
+      <div class="card-body">
+        <h2>Which beans would you prefer in the office?</h2>
+        <div class="happy-bar" id="beans-bar"></div>
+        <div class="happy-legend" id="beans-legend"></div>
+      </div>
+    </section>
+
     <section class="card results-card" id="comments-card" hidden>
       <div class="card-body">
         <h2>Comments</h2>
@@ -73,7 +81,7 @@
         </div>
         <div class="table-wrap">
           <table class="votes-table">
-            <thead><tr><th>Time (UTC)</th><th>☕</th><th>🥛</th><th>👆</th><th>⚡</th><th>🧼</th><th>❤️</th><th>Happy?</th><th>Comment</th></tr></thead>
+            <thead><tr><th>Time (UTC)</th><th>☕</th><th>🥛</th><th>👆</th><th>⚡</th><th>🧼</th><th>❤️</th><th>Happy?</th><th>Beans</th><th>Comment</th></tr></thead>
             <tbody id="votes"></tbody>
           </table>
         </div>
@@ -105,6 +113,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="machines.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

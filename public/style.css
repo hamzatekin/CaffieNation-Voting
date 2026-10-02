@@ -495,3 +495,50 @@ textarea:focus, .dot:focus-visible, .choice:focus-visible, .btn:focus-visible { 
 .votes-table th { color: var(--muted); font-weight: 600; }
 .votes-table td:last-child { white-space: normal; min-width: 200px; }
 .logout { margin-top: 8px; }
+
+/* ---------- Machine, beans note, "didn't try" ---------- */
+.machine-photo {
+  display: grid;
+  place-items: center;
+  height: 260px;
+  padding: 16px;
+  background: radial-gradient(circle at 50% 40%, #ffffff 0%, var(--crema) 75%);
+}
+.machine-photo img { max-width: 100%; max-height: 100%; object-fit: contain; animation: rise 0.9s var(--ease) both; }
+.machine-photo.missing { background: linear-gradient(135deg, var(--roast), var(--caramel)); }
+.machine-photo.missing img { display: none; }
+.machine-photo.missing::after { content: "☕"; font-size: 72px; }
+.machine-card h2 { font-size: 30px; }
+.machine-link {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--caramel);
+  text-decoration: none;
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 2px;
+}
+.beans-note { background: linear-gradient(135deg, #fff3ea, var(--card)); border-color: #e8b9a0; }
+.beans-note h2 { font-size: 22px; margin-bottom: 10px; }
+.beans-note p { margin: 0 0 8px; line-height: 1.5; color: var(--roast); }
+.beans-note p:last-child { margin-bottom: 0; }
+.choice small { display: block; font-size: 12px; font-weight: 500; opacity: 0.75; margin-top: -2px; }
+.skip {
+  appearance: none;
+  display: block;
+  margin: 14px auto 0;
+  padding: 9px 16px;
+  border: 2px dashed var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 14px var(--sans);
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.2s var(--ease);
+}
+.skip:active { transform: scale(0.95); }
+.skip.selected { border-style: solid; border-color: var(--roast); background: var(--roast); color: var(--foam); }
+.skip:focus-visible { outline: 3px solid var(--honey); outline-offset: 2px; }
+.skipped { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.happy-seg.bean-red { background: #b0503a; }
+.happy-seg.bean-black { background: var(--espresso); }
+.happy-seg.bean-any { background: var(--latte); }

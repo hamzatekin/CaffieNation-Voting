@@ -1,7 +1,7 @@
--- One row per vote. UNIQUE(machine, voter_id) is what stops the same
--- device from voting twice for the same machine. A NULL rating means
--- "didn't try / don't know".
-CREATE TABLE IF NOT EXISTS votes (
+-- Applied to production on 2026-10-02. Makes ratings nullable ("didn't try"),
+-- adds the bean preference column, and moves the first demo's votes from the
+-- default "coffee-machine" slug to "avari-b20".
+CREATE TABLE votes_new (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   machine    TEXT    NOT NULL,
   voter_id   TEXT    NOT NULL,
@@ -18,11 +18,9 @@ CREATE TABLE IF NOT EXISTS votes (
   created_at TEXT    NOT NULL DEFAULT (datetime('now')),
   UNIQUE (machine, voter_id)
 );
-
+INSERT INTO votes_new (id, machine, voter_id, taste, milk, ease, speed, cleaning, overall, happy, comment, ip_hash, created_at)
+  SELECT id, machine, voter_id, taste, milk, ease, speed, cleaning, overall, happy, comment, ip_hash, created_at FROM votes;
+DROP TABLE votes;
+ALTER TABLE votes_new RENAME TO votes;
 CREATE INDEX IF NOT EXISTS votes_machine_ip ON votes (machine, ip_hash);
-
--- Holds the admin password hash (see isAdmin in src/worker.js).
-CREATE TABLE IF NOT EXISTS settings (
-  key   TEXT PRIMARY KEY,
-  value TEXT NOT NULL
-);
+UPDATE votes SET machine = 'avari-b20' WHERE machine = 'coffee-machine';

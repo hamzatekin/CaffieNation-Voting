@@ -6,21 +6,26 @@ const CATEGORIES = [
   { key: "cleaning", emoji: "🧼", title: "Cleaning / hassle", question: "How practical does it seem day-to-day?", low: "Painful", high: "Effortless", photo: "1442512595331-e89e73853f31" },
   { key: "overall", emoji: "❤️", title: "Overall", question: "How much would you like this machine in the office?", low: "Not at all", high: "Love it", photo: "1497935586351-b67a49e012bf" },
 ];
-const TOTAL = CATEGORIES.length + 1;
+// Six ratings, the beans question and the office machine question.
+const TOTAL = CATEGORIES.length + 2;
 
 const params = new URLSearchParams(location.search);
-const machine = (params.get("m") || "coffee-machine").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) || "coffee-machine";
-const machineName = params.get("name") || prettify(machine);
+const requested = (params.get("m") || window.DEFAULT_MACHINE).toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) || window.DEFAULT_MACHINE;
+const machine = window.MACHINE_ALIASES[requested] || requested;
+const info = window.MACHINES[machine];
+const machineName = params.get("name") || (info ? `${info.maker} ${info.name}` : prettify(machine));
 const votedKey = `cn_voted_${machine}`;
 
-const answers = { ratings: {}, happy: null };
+const answers = { ratings: {}, happy: null, beans: null };
 const $ = (sel) => document.querySelector(sel);
 
-document.getElementById("machine-name").textContent = machine === "coffee-machine" ? "today's machine" : machineName;
+$("#machine-name").textContent = machineName;
 document.title = `CaffieNation · Rate ${machineName}`;
 
+showMachine();
 renderCategories();
-wireChoices();
+wireChoices(".happy-card", "happy");
+wireChoices(".beans-card", "beans");
 revealOnScroll();
 sprinkleBeans();
 
@@ -28,6 +33,20 @@ if (localStorage.getItem(votedKey)) showDone(true);
 
 function prettify(slug) {
   return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
+function showMachine() {
+  if (!info) return;
+  $("#machine-maker").textContent = `Today's machine · ${info.maker}`;
+  $("#machine-title").textContent = info.name;
+  $("#machine-tagline").textContent = info.tagline;
+  $("#machine-link").href = info.link;
+  const img = $("#machine-img");
+  img.alt = `${info.maker} ${info.name}`;
+  img.onerror = () => img.parentElement.classList.add("missing");
+  img.src = info.image;
+  $("#machine-card").hidden = false;
+  $("#beans-note").hidden = !info.redBeans;
 }
 
 function voterId() {
@@ -57,31 +76,38 @@ function renderCategories() {
           ${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="dot" role="radio" aria-checked="false" aria-label="${n} of 5" data-value="${n}"><span>${n}</span></button>`).join("")}
         </div>
         <div class="scale-labels"><span>${cat.low}</span><span>${cat.high}</span></div>
+        <button type="button" class="skip" aria-pressed="false">🤷 Didn't try / don't know</button>
       </div>`;
+    const skip = card.querySelector(".skip");
+    const select = (value) => {
+      answers.ratings[cat.key] = value;
+      card.querySelectorAll(".dot").forEach((d) => {
+        const v = Number(d.dataset.value);
+        d.classList.toggle("filled", value !== "na" && v <= value);
+        d.classList.toggle("selected", v === value);
+        d.setAttribute("aria-checked", String(v === value));
+      });
+      skip.classList.toggle("selected", value === "na");
+      skip.setAttribute("aria-pressed", String(value === "na"));
+      card.classList.add("answered");
+      updateProgress();
+      nudgeToNext(card);
+    };
+    skip.addEventListener("click", () => select("na"));
     card.querySelectorAll(".dot").forEach((dot) => {
       dot.addEventListener("click", () => {
-        const value = Number(dot.dataset.value);
-        answers.ratings[cat.key] = value;
-        card.querySelectorAll(".dot").forEach((d) => {
-          const v = Number(d.dataset.value);
-          d.classList.toggle("filled", v <= value);
-          d.classList.toggle("selected", v === value);
-          d.setAttribute("aria-checked", String(v === value));
-        });
-        card.classList.add("answered");
-        updateProgress();
-        nudgeToNext(card);
+        select(Number(dot.dataset.value));
       });
     });
     container.appendChild(card);
   });
 }
 
-function wireChoices() {
-  const card = document.querySelector(".happy-card");
+function wireChoices(selector, answerKey) {
+  const card = document.querySelector(selector);
   card.querySelectorAll(".choice").forEach((btn) => {
     btn.addEventListener("click", () => {
-      answers.happy = btn.dataset.value;
+      answers[answerKey] = btn.dataset.value;
       card.querySelectorAll(".choice").forEach((b) => {
         b.classList.toggle("selected", b === btn);
         b.setAttribute("aria-checked", String(b === btn));
@@ -103,7 +129,7 @@ function nudgeToNext(card) {
 }
 
 function updateProgress() {
-  const done = Object.keys(answers.ratings).length + (answers.happy ? 1 : 0);
+  const done = Object.keys(answers.ratings).length + (answers.happy ? 1 : 0) + (answers.beans ? 1 : 0);
   $("#progress-fill").style.width = `${(done / TOTAL) * 100}%`;
   $("#progress-text").textContent = done === TOTAL ? "All set, ready to send ☕" : `${done} of ${TOTAL} answered`;
   $("#submit").disabled = done !== TOTAL;
@@ -125,6 +151,7 @@ $("#vote-form").addEventListener("submit", async (event) => {
         voterId: voterId(),
         ratings: answers.ratings,
         happy: answers.happy,
+        beans: answers.beans,
         comment: $("#comment").value,
       }),
     });

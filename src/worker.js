@@ -3,6 +3,7 @@
 
 const CATEGORIES = ["taste", "milk", "ease", "speed", "cleaning", "overall"];
 const HAPPY = ["no", "okay", "yes"];
+const BEANS = ["red", "black", "any"];
 const SLUG = /^[a-z0-9-]{1,40}$/;
 const VOTER_ID = /^[A-Za-z0-9-]{8,64}$/;
 const COOKIE = "cn_vid";
@@ -37,17 +38,26 @@ async function submitVote(request, env) {
   const machine = String(body.machine || "").toLowerCase();
   if (!SLUG.test(machine)) return json({ error: "Unknown machine." }, 400);
 
+  // Every category needs an answer: 1-5, or "na" for "didn't try / don't know".
   const ratings = {};
   for (const key of CATEGORIES) {
-    const value = Number(body.ratings?.[key]);
+    const raw = body.ratings?.[key];
+    if (raw === "na") {
+      ratings[key] = null;
+      continue;
+    }
+    const value = Number(raw);
     if (!Number.isInteger(value) || value < 1 || value > 5) {
-      return json({ error: "Please rate every category." }, 400);
+      return json({ error: "Please answer every category." }, 400);
     }
     ratings[key] = value;
   }
 
   if (!HAPPY.includes(body.happy)) {
     return json({ error: "Please answer the office machine question." }, 400);
+  }
+  if (!BEANS.includes(body.beans)) {
+    return json({ error: "Please pick your preferred beans." }, 400);
   }
 
   const comment = String(body.comment || "").trim().slice(0, 500) || null;
@@ -79,8 +89,8 @@ async function submitVote(request, env) {
   }
 
   const result = await env.DB.prepare(
-    `INSERT INTO votes (machine, voter_id, taste, milk, ease, speed, cleaning, overall, happy, comment, ip_hash)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO votes (machine, voter_id, taste, milk, ease, speed, cleaning, overall, happy, beans, comment, ip_hash)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT (machine, voter_id) DO NOTHING`,
   )
     .bind(
@@ -88,6 +98,7 @@ async function submitVote(request, env) {
       voterId,
       ...CATEGORIES.map((key) => ratings[key]),
       body.happy,
+      body.beans,
       comment,
       ipHash,
     )
@@ -124,7 +135,7 @@ async function results(request, url, env) {
   if (!machine) return json({ machines, machine: null });
 
   const { results: rows } = await env.DB.prepare(
-    `SELECT ${CATEGORIES.join(", ")}, happy, comment, created_at FROM votes WHERE machine = ? ORDER BY id DESC`,
+    `SELECT ${CATEGORIES.join(", ")}, happy, beans, comment, created_at FROM votes WHERE machine = ? ORDER BY id DESC`,
   )
     .bind(machine)
     .all();
@@ -133,22 +144,31 @@ async function results(request, url, env) {
   for (const key of CATEGORIES) {
     const distribution = [0, 0, 0, 0, 0];
     let sum = 0;
+    let skipped = 0;
     for (const row of rows) {
+      if (row[key] === null) {
+        skipped++;
+        continue;
+      }
       distribution[row[key] - 1]++;
       sum += row[key];
     }
-    categories[key] = { average: rows.length ? sum / rows.length : 0, distribution };
+    const rated = rows.length - skipped;
+    categories[key] = { average: rated ? sum / rated : null, distribution, skipped };
   }
 
   const happy = { no: 0, okay: 0, yes: 0 };
   for (const row of rows) happy[row.happy]++;
+
+  const beans = { red: 0, black: 0, any: 0 };
+  for (const row of rows) if (row.beans) beans[row.beans]++;
 
   const comments = rows
     .filter((row) => row.comment)
     .slice(0, 200)
     .map((row) => ({ text: row.comment, happy: row.happy, overall: row.overall, at: row.created_at }));
 
-  return json({ machines, machine, total: rows.length, categories, happy, comments, votes: rows });
+  return json({ machines, machine, total: rows.length, categories, happy, beans, comments, votes: rows });
 }
 
 function json(data, status = 200, setCookie) {

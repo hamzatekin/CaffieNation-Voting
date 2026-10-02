@@ -38,8 +38,37 @@
   </header>
 
   <main id="vote">
+    <section class="card reveal machine-card" id="machine-card" hidden>
+      <div class="machine-photo"><img id="machine-img" alt="" loading="eager" referrerpolicy="no-referrer"></div>
+      <div class="card-body">
+        <p class="step" id="machine-maker"></p>
+        <h2 id="machine-title"></h2>
+        <p class="question" id="machine-tagline"></p>
+        <a class="machine-link" id="machine-link" target="_blank" rel="noopener">See this machine on the maker's site ↗</a>
+      </div>
+    </section>
+
+    <section class="card reveal beans-note" id="beans-note" hidden>
+      <div class="card-body">
+        <h2>🔴 About today's beans</h2>
+        <p>Today you tasted <strong>red beans</strong>. If the coffee tasted different or a little sour, that comes from the beans, not the machine.</p>
+        <p>We can also run it with <strong>regular black beans</strong>, which taste closer to the coffee you're used to. Please keep that in mind when you rate the machine.</p>
+      </div>
+    </section>
+
     <form id="vote-form" novalidate>
       <div id="categories"></div>
+
+      <section class="card reveal beans-card" id="beans-card">
+        <div class="card-body">
+          <h2>Which beans would you prefer in the office?</h2>
+          <div class="choices" role="radiogroup" aria-label="Which beans would you prefer in the office?">
+            <button type="button" class="choice" role="radio" aria-checked="false" data-value="red"><span class="choice-emoji">🔴</span>Red beans<small>tasted today</small></button>
+            <button type="button" class="choice" role="radio" aria-checked="false" data-value="black"><span class="choice-emoji">⚫</span>Regular black beans</button>
+            <button type="button" class="choice" role="radio" aria-checked="false" data-value="any"><span class="choice-emoji">🤷</span>Don't mind</button>
+          </div>
+        </div>
+      </section>
 
       <section class="card reveal happy-card">
         <div class="card-photo" style="--photo: url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=900&q=65&auto=format&fit=crop')"></div>
@@ -68,7 +97,7 @@
   <div class="submit-bar">
     <div class="progress" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
     <div class="submit-row">
-      <span id="progress-text">0 of 7 answered</span>
+      <span id="progress-text">0 of 8 answered</span>
       <button class="btn btn-primary" id="submit" form="vote-form" type="submit" disabled>Send my vote</button>
     </div>
     <p class="error" id="error" role="alert" hidden></p>
@@ -83,6 +112,7 @@
     </div>
   </div>
 
+  <script src="machines.js"></script>
   <script src="vote.js"></script>
 </body>
 </html>

@@ -6,6 +6,11 @@ const LABELS = {
   cleaning: "🧼 Cleaning / hassle",
   overall: "❤️ Overall",
 };
+const BEANS = [
+  { key: "red", label: "🔴 Red beans" },
+  { key: "black", label: "⚫ Black beans" },
+  { key: "any", label: "🤷 Don't mind" },
+];
 const HAPPY = [
   { key: "no", label: "👎 No" },
   { key: "okay", label: "😐 It's okay" },
@@ -75,7 +80,7 @@ async function load() {
 
   renderTabs(data.machines, data.machine);
   if (!data.machine) {
-    if (!$("#qr").hasChildNodes()) makeQr("coffee-machine");
+    if (!$("#qr").hasChildNodes()) makeQr(window.DEFAULT_MACHINE);
     return showMessage("No votes yet. Share the QR code below to get started ☕");
   }
   if (!current) {
@@ -92,10 +97,12 @@ function showMessage(text) {
   const el = $("#message");
   el.textContent = text;
   el.hidden = false;
-  ["#stats", "#breakdown", "#happy", "#comments-card", "#votes-card"].forEach((s) => ($(s).hidden = true));
+  ["#stats", "#breakdown", "#happy", "#beans", "#comments-card", "#votes-card"].forEach((s) => ($(s).hidden = true));
 }
 
 function prettify(slug) {
+  const info = window.MACHINES[slug];
+  if (info) return `${info.maker} ${info.name}`;
   return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
@@ -124,10 +131,11 @@ function renderTabs(machines, active) {
 }
 
 function render(data) {
-  ["#stats", "#breakdown", "#happy"].forEach((s) => ($(s).hidden = false));
+  ["#stats", "#breakdown", "#happy", "#beans"].forEach((s) => ($(s).hidden = false));
+  const avg = (c) => (c.average === null ? "–" : c.average.toFixed(1));
 
   $("#stat-total").textContent = data.total;
-  $("#stat-overall").textContent = data.total ? data.categories.overall.average.toFixed(1) : "–";
+  $("#stat-overall").textContent = avg(data.categories.overall);
   $("#stat-yes").textContent = data.total ? `${Math.round((data.happy.yes / data.total) * 100)}%` : "–";
 
   const bars = $("#bars");
@@ -136,11 +144,12 @@ function render(data) {
     const max = Math.max(1, ...c.distribution);
     return `
       <div class="bar-row">
-        <div class="bar-head"><span>${label}</span><strong>${c.average.toFixed(1)}</strong></div>
-        <div class="bar"><div class="bar-fill" style="--w:${(c.average / 5) * 100}%"></div></div>
+        <div class="bar-head"><span>${label}</span><strong>${avg(c)}</strong></div>
+        <div class="bar"><div class="bar-fill" style="--w:${((c.average || 0) / 5) * 100}%"></div></div>
         <div class="dist" title="How many people picked 1, 2, 3, 4, 5">
           ${c.distribution.map((n, i) => `<div class="dist-col"><div class="dist-fill" style="--h:${(n / max) * 100}%"></div><span>${i + 1}</span></div>`).join("")}
         </div>
+        ${c.skipped ? `<p class="skipped">🤷 ${c.skipped} didn't try / don't know (not counted in the average)</p>` : ""}
       </div>`;
   }).join("");
   requestAnimationFrame(() => bars.classList.add("grow"));
@@ -149,12 +158,15 @@ function render(data) {
   $("#happy-bar").innerHTML = HAPPY.map((h) => `<div class="happy-seg ${h.key}" style="flex:${data.happy[h.key]}"></div>`).join("");
   $("#happy-legend").innerHTML = HAPPY.map((h) => `<span>${h.label} <strong>${data.happy[h.key]}</strong> (${Math.round((data.happy[h.key] / total) * 100)}%)</span>`).join("");
 
+  $("#beans-bar").innerHTML = BEANS.map((b) => `<div class="happy-seg bean-${b.key}" style="flex:${data.beans[b.key]}"></div>`).join("");
+  $("#beans-legend").innerHTML = BEANS.map((b) => `<span>${b.label} <strong>${data.beans[b.key]}</strong> (${Math.round((data.beans[b.key] / total) * 100)}%)</span>`).join("");
+
   const list = $("#comments");
   list.innerHTML = "";
   data.comments.forEach((c) => {
     const item = document.createElement("li");
     const mood = HAPPY.find((h) => h.key === c.happy);
-    item.innerHTML = `<p></p><span>${mood ? mood.label : ""} · overall ${c.overall}/5</span>`;
+    item.innerHTML = `<p></p><span>${mood ? mood.label : ""} · overall ${c.overall ?? "–"}/5</span>`;
     item.querySelector("p").textContent = c.text;
     list.appendChild(item);
   });
@@ -166,9 +178,10 @@ function render(data) {
   data.votes.forEach((v) => {
     const row = document.createElement("tr");
     const mood = HAPPY.find((h) => h.key === v.happy);
-    [v.created_at, v.taste, v.milk, v.ease, v.speed, v.cleaning, v.overall, mood ? mood.label : v.happy, v.comment || ""].forEach((value) => {
+    const bean = BEANS.find((b) => b.key === v.beans);
+    [v.created_at, v.taste, v.milk, v.ease, v.speed, v.cleaning, v.overall, mood ? mood.label : v.happy, bean ? bean.label : "", v.comment || ""].forEach((value) => {
       const cell = document.createElement("td");
-      cell.textContent = value;
+      cell.textContent = value ?? "–";
       row.appendChild(cell);
     });
     tbody.appendChild(row);
@@ -178,9 +191,9 @@ function render(data) {
 
 $("#csv").addEventListener("click", () => {
   if (!lastData) return;
-  const cols = ["created_at", "taste", "milk", "ease", "speed", "cleaning", "overall", "happy", "comment"];
+  const cols = ["created_at", "taste", "milk", "ease", "speed", "cleaning", "overall", "happy", "beans", "comment"];
   const escape = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-  const lines = [cols.join(","), ...lastData.votes.map((v) => cols.map((c) => escape(v[c])).join(","))];
+  const lines = [cols.join(","), ...lastData.votes.map((v) => cols.map((c) => escape(v[c] ?? (c === "comment" || c === "beans" ? "" : "n/a"))).join(","))];
   const blob = new Blob([lines.join("\n")], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -210,7 +223,7 @@ function makeQr(slug) {
   const link = $("#qr-link");
   link.href = url;
   link.textContent = url;
-  $("#qr-machine").value = prettify(slug);
+  $("#qr-machine").value = window.MACHINES[slug] ? window.MACHINES[slug].name : prettify(slug);
   $("#qr-stage-title").textContent = prettify(slug);
   $("#qr-big").dataset.url = url;
 }
