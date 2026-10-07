@@ -63,7 +63,8 @@ async function submitVote(request, env) {
   if (!HAPPY.includes(body.happy)) {
     return json({ error: "Please answer the office machine question." }, 400);
   }
-  if (!BEANS.includes(body.beans)) {
+  // Capsule machines don't ask about beans, so no answer is fine.
+  if (body.beans != null && !BEANS.includes(body.beans)) {
     return json({ error: "Please pick your preferred beans." }, 400);
   }
 
@@ -105,7 +106,7 @@ async function submitVote(request, env) {
       voterId,
       ...CATEGORIES.map((key) => ratings[key]),
       body.happy,
-      body.beans,
+      body.beans || null,
       comment,
       ipHash,
     )

@@ -6,15 +6,15 @@ const CATEGORIES = [
   { key: "cleaning", emoji: "🧼", title: "Cleaning / hassle", question: "How practical does it seem day-to-day?", low: "Painful", high: "Effortless", photo: "1442512595331-e89e73853f31" },
   { key: "overall", emoji: "❤️", title: "Overall", question: "How much would you like this machine in the office?", low: "Not at all", high: "Love it", photo: "1497935586351-b67a49e012bf" },
 ];
-// Six ratings, the beans question and the office machine question.
-const TOTAL = CATEGORIES.length + 2;
-
 const params = new URLSearchParams(location.search);
 const requested = (params.get("m") || window.DEFAULT_MACHINE).toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) || window.DEFAULT_MACHINE;
 const machine = window.MACHINE_ALIASES[requested] || requested;
 const info = window.MACHINES[machine];
 const machineName = params.get("name") || (info ? `${info.maker} ${info.name}` : prettify(machine));
 const votedKey = `cn_voted_${machine}`;
+const askBeans = !info || info.askBeans !== false;
+// Six ratings, the office machine question and, when asked, the beans question.
+const TOTAL = CATEGORIES.length + 1 + (askBeans ? 1 : 0);
 
 const answers = { ratings: {}, happy: null, beans: null };
 const $ = (sel) => document.querySelector(sel);
@@ -25,9 +25,10 @@ document.title = `CaffieNation · Rate ${machineName}`;
 showMachine();
 renderCategories();
 wireChoices(".happy-card", "happy");
-wireChoices(".beans-card", "beans");
+if (askBeans) wireChoices(".beans-card", "beans");
 revealOnScroll();
 sprinkleBeans();
+updateProgress();
 
 if (localStorage.getItem(votedKey)) showDone(true);
 checkVoted();
@@ -71,6 +72,7 @@ function showMachine() {
   img.src = info.image;
   $("#machine-card").hidden = false;
   $("#beans-note").hidden = !info.redBeans;
+  if (!askBeans) $("#beans-card").remove();
 }
 
 function voterId() {

@@ -123,7 +123,7 @@ function render(data) {
     rows.push([label, c.skipped ? `${avg} (${c.skipped} didn't try)` : avg]);
   }
   rows.push(["Happy as office machine?", Object.entries(HAPPY).map(([k, l]) => `${l} ${data.happy[k]} (${pct(data.happy[k])})`).join(" · ")]);
-  rows.push(["Preferred beans", Object.entries(BEANS).map(([k, l]) => `${l} ${data.beans[k]}`).join(" · ")]);
+  if (Object.values(data.beans).some(Boolean)) rows.push(["Preferred beans", Object.entries(BEANS).map(([k, l]) => `${l} ${data.beans[k]}`).join(" · ")]);
 
   const summary = $("#summary");
   summary.innerHTML = "";
