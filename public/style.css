@@ -498,13 +498,15 @@ textarea:focus, .dot:focus-visible, .choice:focus-visible, .btn:focus-visible { 
 
 /* ---------- Machine, beans note, "didn't try" ---------- */
 .machine-photo {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 260px;
   padding: 16px;
+  overflow: hidden;
   background: radial-gradient(circle at 50% 40%, #ffffff 0%, var(--crema) 75%);
 }
-.machine-photo img { max-width: 100%; max-height: 100%; object-fit: contain; animation: rise 0.9s var(--ease) both; }
+.machine-photo img { display: block; max-width: 100%; max-height: 100%; min-width: 0; min-height: 0; object-fit: contain; animation: rise 0.9s var(--ease) both; }
 .machine-photo.missing { background: linear-gradient(135deg, var(--roast), var(--caramel)); }
 .machine-photo.missing img { display: none; }
 .machine-photo.missing::after { content: "☕"; font-size: 72px; }
