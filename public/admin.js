@@ -116,27 +116,37 @@ function renderTabs(machines, active) {
 function render(data) {
   lastData = data;
   const pct = (n) => `${Math.round((n / data.total) * 100)}%`;
-  const rows = [["🗳️ Votes", String(data.total)]];
+  const rows = [["🗳️ Votes", el("span", "score", String(data.total))]];
   for (const [key, label] of Object.entries(LABELS)) {
     const c = data.categories[key];
-    const avg = c.average === null ? "–" : `${c.average.toFixed(1)} / 5`;
-    rows.push([label, c.skipped ? `${avg} (${c.skipped} didn't try)` : avg]);
+    const cell = document.createDocumentFragment();
+    if (c.average === null) {
+      cell.append(el("span", "score", "–"));
+    } else {
+      const meter = el("span", "meter");
+      meter.append(el("span"));
+      meter.firstChild.style.width = `${(c.average / 5) * 100}%`;
+      cell.append(el("span", "score", c.average.toFixed(1)), el("span", "out-of", "/ 5"), meter);
+    }
+    if (c.skipped) cell.append(el("span", "skipped-note", `${c.skipped} didn't try`));
+    rows.push([label, cell]);
   }
-  rows.push(["Happy as office machine?", Object.entries(HAPPY).map(([k, l]) => `${l} ${data.happy[k]} (${pct(data.happy[k])})`).join(" · ")]);
-  if (Object.values(data.beans).some(Boolean)) rows.push(["Preferred beans", Object.entries(BEANS).map(([k, l]) => `${l} ${data.beans[k]}`).join(" · ")]);
+  rows.push(["🙂 Happy as office machine?", pills(Object.entries(HAPPY).map(([k, l]) => [l, data.happy[k], pct(data.happy[k])]))]);
+  if (Object.values(data.beans).some(Boolean)) {
+    rows.push(["🫘 Preferred beans", pills(Object.entries(BEANS).map(([k, l]) => [l, data.beans[k], pct(data.beans[k])]))]);
+  }
 
   const summary = $("#summary");
   summary.innerHTML = "";
   rows.forEach(([label, value]) => {
     const tr = document.createElement("tr");
-    const th = document.createElement("th");
     const td = document.createElement("td");
-    th.textContent = label;
-    td.textContent = value;
-    tr.append(th, td);
+    td.append(value);
+    tr.append(el("th", "", label), td);
     summary.appendChild(tr);
   });
 
+  $(".votes-table").classList.toggle("no-beans", !data.votes.some((v) => v.beans));
   const tbody = $("#votes");
   tbody.innerHTML = "";
   data.votes.forEach((v) => {
@@ -157,6 +167,23 @@ function render(data) {
     tr.prepend(delCell);
     tbody.appendChild(tr);
   });
+}
+
+function el(tag, className = "", text = "") {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function pills(items) {
+  const wrap = el("div", "pills");
+  items.forEach(([label, count, share]) => {
+    const pill = el("span", `pill${count ? "" : " zero"}`, label);
+    pill.append(el("strong", "", String(count)), el("small", "", share));
+    wrap.append(pill);
+  });
+  return wrap;
 }
 
 async function deleteVote(id) {
