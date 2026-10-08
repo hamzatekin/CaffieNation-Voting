@@ -108,6 +108,24 @@ a { color: var(--mocha); }
 .hero h1 { font-size: clamp(40px, 11vw, 68px); font-weight: 800; }
 .lead { font-size: 18px; line-height: 1.5; margin: 16px auto 28px; color: var(--crema); max-width: 30ch; }
 .lead strong { color: #fff; }
+.setup { margin: -8px auto 28px; max-width: 460px; }
+.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.setup-machine {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 10px;
+  border: 1px solid rgba(255, 240, 220, 0.25);
+  border-radius: 16px;
+  background: rgba(255, 240, 220, 0.06);
+  color: var(--crema);
+  opacity: 0.75;
+}
+.setup-machine strong { color: #fff; font-size: 15px; }
+.setup-side, .setup-beans { font-size: 13px; }
+.setup-machine.voting { opacity: 1; border: 2px solid var(--caramel); background: rgba(196, 128, 72, 0.22); }
+.setup-tag { margin-top: 4px; font-size: 12px; font-weight: 700; color: var(--caramel); }
+.setup-note { margin: 12px 0 0; font-size: 14px; line-height: 1.5; color: var(--crema); }
 @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 
 .cup { width: 110px; height: 110px; margin-bottom: 8px; }

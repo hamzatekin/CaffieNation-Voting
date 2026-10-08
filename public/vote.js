@@ -72,8 +72,29 @@ function showMachine() {
   img.src = info.image;
   $("#machine-card").hidden = false;
   $("#beans-note").hidden = !info.redBeans;
+  if (info.setup) showSetup(info.setup);
   if (!askBeans) $("#beans-card").remove();
   else if (info.beanOptions) renderBeanOptions();
+}
+
+function showSetup(setup) {
+  const grid = $("#setup .setup-grid");
+  for (const m of setup.machines) {
+    const tile = document.createElement("div");
+    tile.className = `setup-machine${m.voting ? " voting" : ""}`;
+    tile.append(el("span", "setup-side", m.side === "Left" ? "⬅ On the left" : "On the right ➡"), el("strong", "", m.name), el("span", "setup-beans", m.beans));
+    if (m.voting) tile.append(el("span", "setup-tag", "You're voting on this one"));
+    grid.append(tile);
+  }
+  $("#setup .setup-note").textContent = setup.note;
+  $("#setup").hidden = false;
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  node.className = className;
+  node.textContent = text;
+  return node;
 }
 
 function renderBeanOptions() {

@@ -1,6 +1,7 @@
 // Machines we demo. The vote page shows the photo, link and notes for the
 // machine in its ?m= link; a link without ?m= goes to DEFAULT_MACHINE.
 // askBeans shows the bean preference question (bean-to-cup machines only);
+// setup shows side-by-side machines in the hero when two were on the table.
 // beanOptions relabels its answers: [stored value, emoji, label, note]. The
 // database only accepts red / black / any, so a machine reuses those values.
 window.MACHINES = {
@@ -10,6 +11,13 @@ window.MACHINES = {
     tagline: "Bean-to-cup with a 10.1\" touchscreen, two bean hoppers and a built-in 5 litre fresh milk fridge.",
     image: "https://www.liquidline.co.uk/content/uploads/2025/08/Kalerm_Machine_Front_View_And_Fridge.jpg",
     link: "https://www.liquidline.co.uk/product/liquidline-k2-fresh-milk",
+    setup: {
+      machines: [
+        { side: "Left", name: "K2 – Powdered Milk", beans: "Italia beans" },
+        { side: "Right", name: "K2 – Fresh Milk", beans: "Adventurous beans", voting: true },
+      ],
+      note: "You're rating the fresh milk machine on the right. The coffee tastes different mainly because of the beans, not the machine.",
+    },
     askBeans: true,
     beanQuestion: "Which coffee did you prefer?",
     beanOptions: [
