@@ -82,7 +82,8 @@ function showSetup(setup) {
   for (const m of setup.machines) {
     const tile = document.createElement("div");
     tile.className = `setup-machine${m.voting ? " voting" : ""}`;
-    tile.append(el("span", "setup-side", m.side === "Left" ? "⬅ On the left" : "On the right ➡"), el("strong", "", m.name), el("span", "setup-beans", m.beans));
+    tile.append(el("span", "setup-side", m.side === "Left" ? "⬅ On the left" : "On the right ➡"), el("strong", "", m.name));
+    if (m.beans) tile.append(el("span", "setup-beans", m.beans));
     if (m.voting) tile.append(el("span", "setup-tag", "You're voting on this one"));
     grid.append(tile);
   }

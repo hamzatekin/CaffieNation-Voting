@@ -13,16 +13,16 @@ window.MACHINES = {
     link: "https://www.liquidline.co.uk/product/liquidline-k2-fresh-milk",
     setup: {
       machines: [
-        { side: "Left", name: "K2 – Powdered Milk", beans: "Italia beans" },
-        { side: "Right", name: "K2 – Fresh Milk", beans: "Adventurous beans", voting: true },
+        { side: "Left", name: "K2 – Powdered Milk" },
+        { side: "Right", name: "K2 – Fresh Milk", voting: true },
       ],
       note: "You're rating the fresh milk machine on the right. The coffee tastes different mainly because of the beans, not the machine.",
     },
     askBeans: true,
     beanQuestion: "Which coffee did you prefer?",
     beanOptions: [
-      ["red", "🇮🇹", "Italia", "left machine"],
-      ["black", "🧭", "Adventurous", "right machine"],
+      ["red", "⬅️", "Left", "left machine's coffee"],
+      ["black", "➡️", "Right", "right machine's coffee"],
     ],
   },
   "momento-120": {
