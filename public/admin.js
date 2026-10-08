@@ -7,7 +7,6 @@ const LABELS = {
   overall: "❤️ Overall",
 };
 const HAPPY = { no: "👎 No", okay: "😐 It's okay", yes: "👍 Yes" };
-const BEANS = { red: "🔴 Red beans", black: "⚫ Black beans", any: "🤷 Don't mind" };
 const PW_KEY = "cn_admin_pw";
 
 const $ = (sel) => document.querySelector(sel);
@@ -132,8 +131,9 @@ function render(data) {
     rows.push([label, cell]);
   }
   rows.push(["🙂 Happy as office machine?", pills(Object.entries(HAPPY).map(([k, l]) => [l, data.happy[k], pct(data.happy[k])]))]);
+  const BEANS = beanLabels(data.machine);
   if (Object.values(data.beans).some(Boolean)) {
-    rows.push(["🫘 Preferred beans", pills(Object.entries(BEANS).map(([k, l]) => [l, data.beans[k], pct(data.beans[k])]))]);
+    rows.push(["🫘 Preferred beans", pills(Object.entries(BEANS).map(([k, l]) => [l, data.beans[k] || 0, pct(data.beans[k] || 0)]))]);
   }
 
   const summary = $("#summary");
@@ -199,7 +199,9 @@ $("#csv").addEventListener("click", () => {
   if (!lastData) return;
   const cols = ["created_at", "taste", "milk", "ease", "speed", "cleaning", "overall", "happy", "beans", "comment"];
   const escape = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-  const lines = [cols.join(","), ...lastData.votes.map((v) => cols.map((c) => escape(v[c] ?? (LABELS[c] ? "n/a" : ""))).join(","))];
+  const beanNames = beanLabels(lastData.machine, false);
+  const value = (v, c) => (c === "beans" ? beanNames[v.beans] : v[c]) ?? (LABELS[c] ? "n/a" : "");
+  const lines = [cols.join(","), ...lastData.votes.map((v) => cols.map((c) => escape(value(v, c))).join(","))];
   const blob = new Blob([lines.join("\n")], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -207,3 +209,9 @@ $("#csv").addEventListener("click", () => {
   link.click();
   URL.revokeObjectURL(link.href);
 });
+
+// Bean answer labels for one machine, from its beanOptions in machines.js.
+function beanLabels(machine, withEmoji = true) {
+  const options = (window.MACHINES[machine] && window.MACHINES[machine].beanOptions) || window.DEFAULT_BEAN_OPTIONS;
+  return Object.fromEntries(options.map(([value, emoji, label]) => [value, withEmoji ? `${emoji} ${label}` : label]));
+}

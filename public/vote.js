@@ -73,6 +73,34 @@ function showMachine() {
   $("#machine-card").hidden = false;
   $("#beans-note").hidden = !info.redBeans;
   if (!askBeans) $("#beans-card").remove();
+  else if (info.beanOptions) renderBeanOptions();
+}
+
+function renderBeanOptions() {
+  const card = $("#beans-card");
+  const question = info.beanQuestion || card.querySelector("h2").textContent;
+  card.querySelector("h2").textContent = question;
+  const choices = card.querySelector(".choices");
+  choices.setAttribute("aria-label", question);
+  choices.innerHTML = "";
+  for (const [value, emoji, label, note] of info.beanOptions) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "choice";
+    btn.setAttribute("role", "radio");
+    btn.setAttribute("aria-checked", "false");
+    btn.dataset.value = value;
+    const icon = document.createElement("span");
+    icon.className = "choice-emoji";
+    icon.textContent = emoji;
+    btn.append(icon, label);
+    if (note) {
+      const small = document.createElement("small");
+      small.textContent = note;
+      btn.append(small);
+    }
+    choices.append(btn);
+  }
 }
 
 function voterId() {

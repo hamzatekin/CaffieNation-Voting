@@ -238,6 +238,7 @@ main { position: relative; z-index: 1; padding: 28px 16px 170px; max-width: 620p
 
 /* Happy choices */
 .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+.choices:has(> .choice:nth-child(2):last-child) { grid-template-columns: repeat(2, 1fr); }
 .choice {
   appearance: none;
   border: 2px solid var(--line);

@@ -1,7 +1,22 @@
 // Machines we demo. The vote page shows the photo, link and notes for the
 // machine in its ?m= link; a link without ?m= goes to DEFAULT_MACHINE.
-// askBeans shows the bean preference question (bean-to-cup machines only).
+// askBeans shows the bean preference question (bean-to-cup machines only);
+// beanOptions relabels its answers: [stored value, emoji, label, note]. The
+// database only accepts red / black / any, so a machine reuses those values.
 window.MACHINES = {
+  "k2-fresh-milk": {
+    name: "K2 – Fresh Milk",
+    maker: "Liquidline",
+    tagline: "Bean-to-cup with a 10.1\" touchscreen, two bean hoppers and a built-in 5 litre fresh milk fridge.",
+    image: "https://www.liquidline.co.uk/content/uploads/2025/08/Kalerm_Machine_Front_View_And_Fridge.jpg",
+    link: "https://www.liquidline.co.uk/product/liquidline-k2-fresh-milk",
+    askBeans: true,
+    beanQuestion: "Which coffee did you prefer?",
+    beanOptions: [
+      ["red", "🇮🇹", "Italia", "left machine"],
+      ["black", "🧭", "Adventurous", "right machine"],
+    ],
+  },
   "momento-120": {
     name: "Momento 120",
     maker: "Nespresso",
@@ -20,6 +35,12 @@ window.MACHINES = {
     askBeans: true,
   },
 };
-window.DEFAULT_MACHINE = "momento-120";
+window.DEFAULT_MACHINE = "k2-fresh-milk";
 // Old links that should count towards a machine above.
-window.MACHINE_ALIASES = { "coffee-machine": "avari-b20", "momento": "momento-120", "m120": "momento-120" };
+window.MACHINE_ALIASES = { "coffee-machine": "avari-b20", "momento": "momento-120", "m120": "momento-120", "k2": "k2-fresh-milk" };
+// Bean answers for machines without their own beanOptions.
+window.DEFAULT_BEAN_OPTIONS = [
+  ["red", "🔴", "Red beans", "tasted today"],
+  ["black", "⚫", "Regular black beans"],
+  ["any", "🤷", "Don't mind"],
+];

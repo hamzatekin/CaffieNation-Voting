@@ -3,6 +3,7 @@
 
 const CATEGORIES = ["taste", "milk", "ease", "speed", "cleaning", "overall"];
 const HAPPY = ["no", "okay", "yes"];
+// Stored bean answers. Machines relabel them with beanOptions in public/machines.js.
 const BEANS = ["red", "black", "any"];
 const SLUG = /^[a-z0-9-]{1,40}$/;
 const VOTER_ID = /^[A-Za-z0-9-]{8,64}$/;

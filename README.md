@@ -4,7 +4,7 @@ A small, mobile-first voting site for the office coffee machine demos.
 People scan a QR code, rate the machine on six categories (1 to 5), answer
 "Would you be happy if this became our office machine?", and can leave a comment.
 
-- `/` is the vote page for today's machine (the Rijo42 avari B20); `/?m=<slug>` picks another machine
+- `/` is the vote page for today's machine (`DEFAULT_MACHINE` in `public/machines.js`); `/?m=<slug>` picks another machine
 - Machines (photo, link, red-beans note) are listed in `public/machines.js`; add one there before its demo
 - `/admin` (password protected) shows a summary per machine, every vote and comment, a CSV download, and lets you delete test votes
 
