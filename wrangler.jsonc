@@ -15,6 +15,8 @@
       "database_id": "b24edb1c-8d63-487b-944e-cec7f8838e0d"
     }
   ],
+  // Workers AI, used for the admin page's comment summary (free daily allowance).
+  "ai": { "binding": "AI" },
   "vars": {
     // Optional: cap votes per network per machine. 0 = off. Keep it off for
     // office Wi-Fi, where everyone shares one public IP.

@@ -20,6 +20,12 @@ export default {
       if (url.pathname === "/api/results" && request.method === "GET") {
         return await results(request, url, env);
       }
+      if (url.pathname === "/api/overview" && request.method === "GET") {
+        return await overview(request, env);
+      }
+      if (url.pathname === "/api/summary" && request.method === "POST") {
+        return await generateSummary(request, env);
+      }
       if (url.pathname === "/api/status" && request.method === "GET") {
         return await status(request, url, env);
       }
@@ -178,6 +184,108 @@ async function results(request, url, env) {
     .map((row) => ({ text: row.comment, happy: row.happy, overall: row.overall, at: row.created_at }));
 
   return json({ machines, machine, total: rows.length, categories, happy, beans, comments, votes: rows });
+}
+
+// Every machine side by side for the admin "All machines" tab, plus the last
+// AI summary of the comments (cached in the settings table).
+async function overview(request, env) {
+  if (!(await isAdmin(request, env))) {
+    return json({ error: "Wrong password." }, 401);
+  }
+  const avg = CATEGORIES.map((key) => `AVG(${key}) AS ${key}`).join(", ");
+  const { results: rows } = await env.DB.prepare(
+    `SELECT machine, COUNT(*) AS votes, ${avg},
+       SUM(happy = 'yes') AS yes, SUM(happy = 'okay') AS okay, SUM(happy = 'no') AS no,
+       SUM(beans = 'red') AS red, SUM(beans = 'black') AS black, SUM(beans = 'any') AS any_beans,
+       SUM(comment IS NOT NULL) AS comments,
+       MIN(created_at) AS first_vote, MAX(created_at) AS last_vote
+     FROM votes GROUP BY machine ORDER BY first_vote`,
+  ).all();
+
+  const machines = rows.map((r) => ({
+    machine: r.machine,
+    votes: r.votes,
+    averages: Object.fromEntries(CATEGORIES.map((key) => [key, r[key]])),
+    happy: { yes: r.yes, okay: r.okay, no: r.no },
+    beans: { red: r.red, black: r.black, any: r.any_beans },
+    comments: r.comments,
+    firstVote: r.first_vote,
+    lastVote: r.last_vote,
+  }));
+  const commentCount = machines.reduce((n, m) => n + m.comments, 0);
+  return json({ machines, commentCount, summary: await cachedSummary(env) });
+}
+
+async function cachedSummary(env) {
+  const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'ai_summary'").first();
+  try {
+    return row ? JSON.parse(row.value) : null;
+  } catch {
+    return null;
+  }
+}
+
+// Summarises every comment with Workers AI (free daily allowance). Only runs
+// when the admin presses the button; the result is stored so page loads are free.
+const AI_MODELS = ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-3.1-8b-instruct-fast"];
+
+async function generateSummary(request, env) {
+  if (!(await isAdmin(request, env))) {
+    return json({ error: "Wrong password." }, 401);
+  }
+  if (!env.AI) return json({ error: "Workers AI is not set up for this site." }, 500);
+
+  // The page sends the machine display names from machines.js.
+  const body = await request.json().catch(() => ({}));
+  const nameOf = (slug) => String(body.names?.[slug] || slug).slice(0, 60);
+
+  const { results: rows } = await env.DB.prepare(
+    "SELECT machine, overall, happy, comment FROM votes WHERE comment IS NOT NULL ORDER BY machine, id",
+  ).all();
+  if (!rows.length) return json({ error: "There are no comments to summarise yet." }, 400);
+
+  const lines = rows.map((r) => `[${nameOf(r.machine)}] (overall ${r.overall ?? "n/a"}/5, happy as office machine: ${r.happy}) ${r.comment.replace(/\s+/g, " ")}`);
+  const prompt = [
+    "These are comments from office staff who tried coffee machines at demos. Each line starts with the machine name in brackets.",
+    "Write a short, plain-English summary for the person choosing the office machine:",
+    "1. One line per machine: what people liked and disliked (use the machine name as given).",
+    "2. Themes that came up across machines.",
+    "3. One sentence on which machine people seem to prefer and why.",
+    "Keep it under 220 words. Use simple bullet points with '- '. Only use what the comments say.",
+    "",
+    "Comments:",
+    ...lines,
+  ].join("\n");
+
+  let text = "";
+  let model = "";
+  let lastError;
+  for (const candidate of AI_MODELS) {
+    try {
+      const out = await env.AI.run(candidate, {
+        messages: [
+          { role: "system", content: "You summarise feedback clearly and neutrally. You never invent details." },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 600,
+      });
+      text = String(out?.response || "").trim();
+      model = candidate;
+      if (text) break;
+    } catch (err) {
+      lastError = err;
+      console.error(candidate, err);
+    }
+  }
+  if (!text) {
+    return json({ error: `The AI summary failed${lastError ? ` (${lastError.message})` : ""}. Please try again later.` }, 502);
+  }
+
+  const summary = { text, model, commentCount: rows.length, generatedAt: new Date().toISOString() };
+  await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('ai_summary', ?)")
+    .bind(JSON.stringify(summary))
+    .run();
+  return json({ summary });
 }
 
 // Lets the vote page check whether this device already voted, so a vote

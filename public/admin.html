@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body class="results-page">
   <header class="results-hero">
@@ -35,6 +35,44 @@
 
     <div id="dashboard" hidden>
       <p class="empty" id="message" hidden></p>
+
+      <div id="overview" hidden>
+        <p class="takeaway" id="takeaway"></p>
+
+        <section class="leaderboard" id="leaderboard" aria-label="Machines ranked by overall score"></section>
+
+        <section class="card results-card">
+          <div class="card-body">
+            <h2>Head to head</h2>
+            <p class="question">Average score out of 5 for each category. 👑 marks the best machine in that row.</p>
+            <div class="legend" id="legend"></div>
+            <div class="compare" id="compare"></div>
+          </div>
+        </section>
+
+        <section class="card results-card">
+          <div class="card-body">
+            <h2>Happy as the office machine?</h2>
+            <div class="legend">
+              <span><i class="swatch happy-yes"></i>👍 Yes</span>
+              <span><i class="swatch happy-okay"></i>😐 It's okay</span>
+              <span><i class="swatch happy-no"></i>👎 No</span>
+            </div>
+            <div id="happy-bars"></div>
+          </div>
+        </section>
+
+        <section class="card results-card">
+          <div class="card-body">
+            <div class="votes-head">
+              <h2>✨ AI summary of the comments</h2>
+              <button class="btn btn-ghost btn-small" id="ai-run" type="button">Summarise</button>
+            </div>
+            <div class="ai-summary" id="ai-text"></div>
+            <p class="hint" id="ai-meta"></p>
+          </div>
+        </section>
+      </div>
 
       <div id="results" hidden>
         <section class="card results-card">
@@ -66,6 +104,6 @@
   </main>
 
   <script src="machines.js?v=9"></script>
-  <script src="admin.js?v=7"></script>
+  <script src="admin.js?v=8"></script>
 </body>
 </html>

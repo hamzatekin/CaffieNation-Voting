@@ -7,6 +7,7 @@ People scan a QR code, rate the machine on six categories (1 to 5), answer
 - `/` is the vote page for today's machine (`DEFAULT_MACHINE` in `public/machines.js`); `/?m=<slug>` picks another machine
 - Machines (photo, link, red-beans note) are listed in `public/machines.js`; add one there before its demo
 - `/admin` (password protected) shows a summary per machine, every vote and comment, a CSV download, and lets you delete test votes
+- The admin "All machines" tab compares every machine side by side and can write an AI summary of all comments with [Workers AI](https://developers.cloudflare.com/workers-ai/) (free daily allowance). The summary only runs when you press the button and is saved in the `settings` table
 
 Everything runs free on Cloudflare: the pages are static files and the votes
 live in a D1 (SQLite) database behind a tiny Worker (`src/worker.js`).
