@@ -654,3 +654,4 @@ textarea:focus, .dot:focus-visible, .choice:focus-visible, .btn:focus-visible { 
   .cmp-row { grid-template-columns: 112px 1fr 48px; }
   .happy-row { grid-template-columns: 112px 1fr; }
 }
+.tie-note { margin: 10px 0 0; font-size: 12px; color: var(--muted); }

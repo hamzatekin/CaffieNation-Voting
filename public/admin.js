@@ -266,7 +266,10 @@ function renderOverview(data) {
     short: (window.MACHINES[m.machine] && window.MACHINES[m.machine].name) || m.machine,
   }));
   const yesShare = (m) => (m.votes ? m.happy.yes / m.votes : 0);
-  const ranked = [...machines].sort((a, b) => (b.averages.overall ?? 0) - (a.averages.overall ?? 0) || yesShare(b) - yesShare(a));
+  // Rank by the overall score as shown (one decimal). Equal scores are broken
+  // by the share of "Yes, I'd be happy" votes, then by number of votes.
+  const shown = (m) => Math.round((m.averages.overall ?? 0) * 10);
+  const ranked = [...machines].sort((a, b) => shown(b) - shown(a) || yesShare(b) - yesShare(a) || b.votes - a.votes);
   const leader = ranked[0];
 
   const happiest = [...machines].sort((a, b) => yesShare(b) - yesShare(a))[0];
@@ -293,6 +296,10 @@ function renderOverview(data) {
       el("span", "", `📅 ${shortDate(m.firstVote)}`),
     );
     tile.append(head, score, facts);
+    const tiedWith = ranked.filter((other) => other !== m && shown(other) === shown(m));
+    if (tiedWith.length) {
+      tile.append(el("p", "tie-note", `Tied on score with ${tiedWith.map((o) => o.short).join(", ")}, so ranked by 👍 happy`));
+    }
     board.append(tile);
   });
 
