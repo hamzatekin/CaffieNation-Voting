@@ -72,9 +72,22 @@ function showMachine() {
   img.src = info.image;
   $("#machine-card").hidden = false;
   $("#beans-note").hidden = !info.redBeans;
+  if (info.notice) showNotice(info.notice);
   if (info.setup) showSetup(info.setup);
   if (!askBeans) $("#beans-card").remove();
   else if (info.beanOptions) renderBeanOptions();
+}
+
+// Notice lines come from machines.js (our own text), so they may hold <strong>.
+function showNotice(notice) {
+  const body = $("#demo-note .card-body");
+  body.querySelector("h2").textContent = notice.title;
+  for (const line of notice.lines) {
+    const p = document.createElement("p");
+    p.innerHTML = line;
+    body.append(p);
+  }
+  $("#demo-note").hidden = false;
 }
 
 function showSetup(setup) {

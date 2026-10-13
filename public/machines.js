@@ -4,7 +4,24 @@
 // setup shows side-by-side machines in the hero when two were on the table.
 // beanOptions relabels its answers: [stored value, emoji, label, note]. The
 // database only accepts red / black / any, so a machine reuses those values.
+// notice shows a "good to know" card under the machine: { title, lines }.
 window.MACHINES = {
+  "k-x460": {
+    name: "K-X460 – Fresh Milk",
+    maker: "Lavazza",
+    tagline: "Bean-to-cup from the Barista collection with a 10\" HD touchscreen, two bean hoppers, fresh milk and 20 drinks.",
+    image: "https://s39409.pcdn.co/wp-content/uploads/2026/08/X460C5-DRIP-TRAY-scaled-e1788799357549.png.webp",
+    link: "https://www.lavazzapro.co.uk/systems/bean-to-cup/k-x460-fresh-milk-coffee-machine/",
+    notice: {
+      title: "ℹ️ About today's demo",
+      lines: [
+        "Lavazza brought a <strong>smaller substitute machine</strong>, not the actual K-X460, which is bigger and bulkier.",
+        "It ran low on cups and had to stop to clean itself during the demo. Please rate the coffee and the machine as best you can with that in mind.",
+        "The beans you tried are <strong>one of 8 options</strong> Lavazza offers, so the taste can be changed.",
+      ],
+    },
+    askBeans: false,
+  },
   "k2-fresh-milk": {
     name: "K2 – Fresh Milk",
     maker: "Liquidline",
@@ -43,9 +60,9 @@ window.MACHINES = {
     askBeans: true,
   },
 };
-window.DEFAULT_MACHINE = "k2-fresh-milk";
+window.DEFAULT_MACHINE = "k-x460";
 // Old links that should count towards a machine above.
-window.MACHINE_ALIASES = { "coffee-machine": "avari-b20", "momento": "momento-120", "m120": "momento-120", "k2": "k2-fresh-milk" };
+window.MACHINE_ALIASES = { "coffee-machine": "avari-b20", "momento": "momento-120", "m120": "momento-120", "k2": "k2-fresh-milk", "kx460": "k-x460", "lavazza": "k-x460" };
 // Bean answers for machines without their own beanOptions.
 window.DEFAULT_BEAN_OPTIONS = [
   ["red", "🔴", "Red beans", "tasted today"],

@@ -5,7 +5,7 @@ People scan a QR code, rate the machine on six categories (1 to 5), answer
 "Would you be happy if this became our office machine?", and can leave a comment.
 
 - `/` is the vote page for today's machine (`DEFAULT_MACHINE` in `public/machines.js`); `/?m=<slug>` picks another machine
-- Machines (photo, link, red-beans note) are listed in `public/machines.js`; add one there before its demo
+- Machines (photo, link, red-beans note, demo notice) are listed in `public/machines.js`; add one there before its demo
 - `/admin` (password protected) shows a summary per machine, every vote and comment, a CSV download, and lets you delete test votes
 - The admin "All machines" tab compares every machine side by side and can write an AI summary of all comments with [Workers AI](https://developers.cloudflare.com/workers-ai/) (free daily allowance). The summary only runs when you press the button and is saved in the `settings` table
 
